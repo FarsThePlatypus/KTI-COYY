@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Jadwal Petugas Sholat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Input Names for Imam, Muadzin, and Du'a Reader</h1>
+    <form id="schedule-form">
+        <label for="day">Day of the Month:</label>
+        <input type="number" id="day" name="day" min="1" max="31">
+        <br><br>
+        <label for="imam">Imam's Name:</label>
+        <input type="text" id="imam" name="imam">
+        <br><br>
+        <label for="muadzin">Muadzin's Name:</label>
+        <input type="text" id="muadzin" name="muadzin">
+        <br><br>
+        <label for="duaReader">Du'a Reader's Name:</label>
+        <input type="text" id="duaReader" name="duaReader">
+        <br><br>
+        <button type="submit">Update Schedule</button>
+    </form>
+
+    <script>
+        document.getElementById('schedule-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const day = document.getElementById('day').value;
+            const imam = document.getElementById('imam').value;
+            const muadzin = document.getElementById('muadzin').value;
+            const duaReader = document.getElementById('duaReader').value;
+
+            const response = await fetch('/update_schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ day, imam, muadzin, duaReader })
+            });
+            const result = await response.text();
+            alert(result);
+        });
+    </script>
+</body>
+</html>
