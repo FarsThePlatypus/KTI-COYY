@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengaturan Jadwal Petugas Sholat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    .day-container {
+      margin: 10px 0;
+    }
+  </style>
+  <script>
+    function getDaysInMonth(month, year) {
+      return new Date(year, month, 0).getDate();
+    }
+
+    function generateInputs() {
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      const daysInMonth = getDaysInMonth(month, year);
+
+      const container = document.getElementById('days-container');
+      container.innerHTML = '';
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day-container';
+
+        const header = document.createElement('h3');
+        header.innerText = `Day ${day}`;
+        
+        const imamInput = createTextInput(`day${day}_imam`, "Imam's Name");
+        const muadzinInput = createTextInput(`day${day}_muadzin`, "Muadzin's Name");
+        const duareaderInput = createTextInput(`day${day}_duareader`, "Du'a Reader's Name");
+
+        dayDiv.appendChild(header);
+        dayDiv.appendChild(imamInput);
+        dayDiv.appendChild(muadzinInput);
+        dayDiv.appendChild(duareaderInput);
+
+        container.appendChild(dayDiv);
+      }
+    }
+
+    function createTextInput(name, placeholder) {
+      const label = document.createElement('label');
+      label.innerText = placeholder + ": ";
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = name;
+      input.placeholder = placeholder;
+      
+      const div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(input);
+      
+      return div;
+    }
+  </script>
+</head>
+<body>
+  <h1>Pengaturan Jadwal Petugas Sholat</h1>
+
+  <form method="POST" action="/submit-schedule">
+    <label for="month">Select Month: </label>
+    <select id="month" name="month" onchange="generateInputs()">
+      <option value="1">January</option>
+      <option value="2">February</option>
+      <!-- Continue with other months -->
+      <option value="12">December</option>
+    </select>
+    
+    <label for="year">Select Year: </label>
+    <input type="number" id="year" name="year" value="2024" onchange="generateInputs()" />
+
+    <div id="days-container"></div>
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
