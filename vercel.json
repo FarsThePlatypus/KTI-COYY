@@ -2,15 +2,15 @@
   "version": 2,
   "builds": [
     {
+      "src": "frontend/**/*",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/schedule.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/submit-schedule",
-      "dest": "/api/schedule.js"
-    },
     {
       "src": "/schedule",
       "dest": "/api/schedule.js"
