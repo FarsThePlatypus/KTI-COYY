@@ -1,25 +1,24 @@
-// This is the Vercel serverless function handler
+// /api/schedule.js
 export default function handler(req, res) {
-  // Handle different HTTP methods
-  if (req.method === 'POST') {
-    const { month, year, ...days } = req.body;
-    
-    // Store schedule data in an in-memory object (temporary storage)
-    schedule[`${year}-${month}`] = days;
-
-    console.log(`Schedule for ${year}-${month} received:`, days);
-    return res.status(200).send('Schedule submitted successfully!');
-  } else if (req.method === 'GET') {
+  if (req.method === 'GET') {
+    // Handle GET request to fetch the schedule
     const { month, year } = req.query;
-    
-    // Return the stored schedule for the given month and year
-    const monthSchedule = schedule[`${year}-${month}`];
-    return res.status(200).json(monthSchedule || {});
+    // Here, you would get the schedule from wherever it's stored (in this case, a simple object)
+    const schedule = {
+      "2024-11": {
+        "1": { imam: "Imam A", muadzin: "Muadzin A", duaReader: "DuaReader A" },
+        "2": { imam: "Imam B", muadzin: "Muadzin B", duaReader: "DuaReader B" },
+      }
+    };
+    const monthSchedule = schedule[`${year}-${month}`] || {};
+    res.status(200).json(monthSchedule);
+  } else if (req.method === 'POST') {
+    // Handle POST request to submit the schedule
+    const { month, year, ...days } = req.body;
+    // You would typically save this to a database or a file
+    console.log(`Schedule for ${month}/${year} received:`, days);
+    res.status(200).json({ message: 'Schedule submitted successfully!' });
   } else {
-    // Handle other HTTP methods (if needed, e.g., PUT, DELETE)
-    return res.status(405).send('Method Not Allowed');
+    res.status(405).json({ message: 'Method Not Allowed' });
   }
 }
-
-// Schedule object to temporarily store data
-let schedule = {};
