@@ -48,12 +48,41 @@
 
       return div;
     }
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const data = {};
+
+      // Collect form data into an object
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      
+      // Send POST request to Vercel backend
+      const response = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ month, year, ...data }),
+      });
+
+      if (response.ok) {
+        alert('Schedule submitted successfully!');
+      } else {
+        alert('Error submitting schedule!');
+      }
+    }
   </script>
 </head>
 <body>
   <h1>Pengaturan Jadwal Petugas Sholat</h1>
 
-  <form action="/submit-schedule" method="post">
+  <form onsubmit="handleSubmit(event)">
     <label for="month">Pilih Bulan: </label>
     <select id="month" name="month" onchange="generateInputs()">
       <option value="1">Januari</option>
