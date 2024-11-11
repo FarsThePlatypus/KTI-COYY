@@ -1,24 +1,25 @@
-// api/schedule.js
-const express = require('express');
-const app = express();
+// This is the Vercel serverless function handler
+export default function handler(req, res) {
+  // Handle different HTTP methods
+  if (req.method === 'POST') {
+    const { month, year, ...days } = req.body;
+    
+    // Store schedule data in an in-memory object (temporary storage)
+    schedule[`${year}-${month}`] = days;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+    console.log(`Schedule for ${year}-${month} received:`, days);
+    return res.status(200).send('Schedule submitted successfully!');
+  } else if (req.method === 'GET') {
+    const { month, year } = req.query;
+    
+    // Return the stored schedule for the given month and year
+    const monthSchedule = schedule[`${year}-${month}`];
+    return res.status(200).json(monthSchedule || {});
+  } else {
+    // Handle other HTTP methods (if needed, e.g., PUT, DELETE)
+    return res.status(405).send('Method Not Allowed');
+  }
+}
 
+// Schedule object to temporarily store data
 let schedule = {};
-
-app.post('/submit-schedule', (req, res) => {
-  const { month, year, ...days } = req.body;
-  schedule[`${year}-${month}`] = days;
-  console.log(`Schedule for ${year}-${month} received:`, days);
-  res.send('Schedule submitted successfully!');
-});
-
-app.get('/schedule', (req, res) => {
-  const { month, year } = req.query;
-  const monthSchedule = schedule[`${year}-${month}`];
-  res.json(monthSchedule || {});
-});
-
-// Export as serverless function
-module.exports = app;
