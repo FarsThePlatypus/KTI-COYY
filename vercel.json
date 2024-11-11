@@ -1,19 +1,14 @@
+// /vercel.json
 {
   "version": 2,
   "builds": [
     {
-      "src": "frontend/**/*",
+      "src": "frontend/index.html",
       "use": "@vercel/static"
     },
     {
       "src": "api/schedule.js",
       "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/schedule",
-      "dest": "/api/schedule.js"
     }
   ]
 }
