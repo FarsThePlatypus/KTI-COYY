@@ -1,3 +1,4 @@
+<!-- /frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,30 @@
   <title>Pengaturan Jadwal Petugas Sholat</title>
   <link rel="stylesheet" href="styles.css">
   <script>
+    async function submitSchedule() {
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      const days = Array.from(document.querySelectorAll('.day')).reduce((acc, dayElem) => {
+        const day = dayElem.dataset.day;
+        const imam = dayElem.querySelector('.imam').value;
+        const muadzin = dayElem.querySelector('.muadzin').value;
+        const duaReader = dayElem.querySelector('.duaReader').value;
+        acc[day] = { imam, muadzin, duaReader };
+        return acc;
+      }, {});
+
+      const response = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ month, year, ...days }),
+      });
+
+      const result = await response.json();
+      alert(result.message);
+    }
+
     function getDaysInMonth(month, year) {
       return new Date(year, month, 0).getDate();
     }
@@ -14,67 +39,24 @@
       const month = document.getElementById('month').value;
       const year = document.getElementById('year').value;
       const daysInMonth = getDaysInMonth(month, year);
-
       const container = document.getElementById('days-container');
       container.innerHTML = '';
 
       for (let day = 1; day <= daysInMonth; day++) {
-        const dayHeader = document.createElement('h3');
-        dayHeader.innerText = `Hari ke-${day}:`;
+        const dayDiv = document.createElement('div');
+        dayDiv.classList.add('day');
+        dayDiv.dataset.day = day;
 
-        const imamInput = createTextInput(`day${day}_imam`, `Nama Imam untuk Hari ke-${day}`);
-        const muadzinInput = createTextInput(`day${day}_muadzin`, `Nama Muadzin untuk Hari ke-${day}`);
-        const duaReaderInput = createTextInput(`day${day}_dua`, `Pembaca Du'a untuk Hari ke-${day}`);
-
-        container.appendChild(dayHeader);
-        container.appendChild(imamInput);
-        container.appendChild(muadzinInput);
-        container.appendChild(duaReaderInput);
-      }
-    }
-
-    function createTextInput(name, placeholder) {
-      const label = document.createElement('label');
-      label.innerText = placeholder + ": ";
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.name = name;
-      input.placeholder = placeholder;
-
-      const div = document.createElement('div');
-      div.appendChild(label);
-      div.appendChild(input);
-
-      return div;
-    }
-
-    async function handleSubmit(event) {
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const data = {};
-
-      // Collect form data into an object
-      formData.forEach((value, key) => {
-        data[key] = value;
-      });
-
-      const month = document.getElementById('month').value;
-      const year = document.getElementById('year').value;
-      
-      // Send POST request to Vercel backend
-      const response = await fetch('/api/schedule', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ month, year, ...data }),
-      });
-
-      if (response.ok) {
-        alert('Schedule submitted successfully!');
-      } else {
-        alert('Error submitting schedule!');
+        dayDiv.innerHTML = `
+          <h3>Hari ke-${day}</h3>
+          <label>Nama Imam:</label>
+          <input class="imam" type="text" placeholder="Nama Imam" />
+          <label>Nama Muadzin:</label>
+          <input class="muadzin" type="text" placeholder="Nama Muadzin" />
+          <label>Pembaca Du'a:</label>
+          <input class="duaReader" type="text" placeholder="Pembaca Du'a" />
+        `;
+        container.appendChild(dayDiv);
       }
     }
   </script>
@@ -82,7 +64,7 @@
 <body>
   <h1>Pengaturan Jadwal Petugas Sholat</h1>
 
-  <form onsubmit="handleSubmit(event)">
+  <form id="schedule-form" onsubmit="event.preventDefault(); submitSchedule();">
     <label for="month">Pilih Bulan: </label>
     <select id="month" name="month" onchange="generateInputs()">
       <option value="1">Januari</option>
