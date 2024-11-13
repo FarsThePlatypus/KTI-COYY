@@ -1,31 +1,31 @@
 const express = require('express');
 const app = express();
-const port = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Object to store the schedules
-let schedule = {};
+let schedule = {}; // This will hold the schedule data in-memory
 
-// Endpoint to submit schedule data
+// POST endpoint to submit the schedule data
 app.post('/api/schedule', (req, res) => {
   const { month, year, ...days } = req.body;
-  schedule[`${year}-${month}`] = days;
-  console.log(`Schedule for ${year}-${month} received:`, days); // Log received data
+  const scheduleKey = `${year}-${month}`;
+  schedule[scheduleKey] = days;
+  console.log(`Schedule for ${scheduleKey} received:`, days);
   res.send('Schedule submitted successfully!');
 });
 
-// Endpoint to view all stored schedule data
+// GET endpoint to retrieve the schedule data
 app.get('/api/view-schedule', (req, res) => {
-  res.json(schedule); // Responds with all stored schedules
-});
-
-// Endpoint to view a specific schedule for a month and year
-app.get('/api/view-schedule/specific', (req, res) => {
   const { month, year } = req.query;
-  const monthSchedule = schedule[`${year}-${month}`];
-  res.json(monthSchedule || {}); // Respond with specific month's schedule if available
+  const scheduleKey = `${year}-${month}`;
+  const monthSchedule = schedule[scheduleKey];
+  if (monthSchedule) {
+    res.json(monthSchedule);
+  } else {
+    res.status(404).send("Schedule not found for the specified month and year.");
+  }
 });
 
+// Export the app for Vercel's serverless function
 module.exports = app;
