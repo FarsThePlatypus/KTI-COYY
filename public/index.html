@@ -1,4 +1,3 @@
-<!-- /frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,64 +6,85 @@
   <title>Pengaturan Jadwal Petugas Sholat</title>
   <link rel="stylesheet" href="styles.css">
   <script>
-    async function submitSchedule() {
+    async function submitSchedule(event) {
+      event.preventDefault();
+
       const month = document.getElementById('month').value;
       const year = document.getElementById('year').value;
-      const days = Array.from(document.querySelectorAll('.day')).reduce((acc, dayElem) => {
-        const day = dayElem.dataset.day;
-        const imam = dayElem.querySelector('.imam').value;
-        const muadzin = dayElem.querySelector('.muadzin').value;
-        const duaReader = dayElem.querySelector('.duaReader').value;
-        acc[day] = { imam, muadzin, duaReader };
-        return acc;
-      }, {});
+      const days = {};
 
-      const response = await fetch('/api/schedule', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ month, year, ...days }),
+      document.querySelectorAll("[data-day]").forEach(input => {
+        const day = input.getAttribute("data-day");
+        if (!days[day]) days[day] = {};
+        days[day][input.name] = input.value;
       });
 
-      const result = await response.json();
-      alert(result.message);
-    }
+      const data = { month, year, ...days };
 
-    function getDaysInMonth(month, year) {
-      return new Date(year, month, 0).getDate();
+      try {
+        const response = await fetch('/api/schedule', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        
+        if (response.ok) {
+          alert('Schedule submitted successfully!');
+        } else {
+          alert('Failed to submit schedule');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error submitting schedule');
+      }
     }
 
     function generateInputs() {
       const month = document.getElementById('month').value;
       const year = document.getElementById('year').value;
-      const daysInMonth = getDaysInMonth(month, year);
+      const daysInMonth = new Date(year, month, 0).getDate();
+
       const container = document.getElementById('days-container');
       container.innerHTML = '';
 
       for (let day = 1; day <= daysInMonth; day++) {
-        const dayDiv = document.createElement('div');
-        dayDiv.classList.add('day');
-        dayDiv.dataset.day = day;
+        const dayHeader = document.createElement('h3');
+        dayHeader.innerText = `Hari ke-${day}:`;
 
-        dayDiv.innerHTML = `
-          <h3>Hari ke-${day}</h3>
-          <label>Nama Imam:</label>
-          <input class="imam" type="text" placeholder="Nama Imam" />
-          <label>Nama Muadzin:</label>
-          <input class="muadzin" type="text" placeholder="Nama Muadzin" />
-          <label>Pembaca Du'a:</label>
-          <input class="duaReader" type="text" placeholder="Pembaca Du'a" />
-        `;
-        container.appendChild(dayDiv);
+        const imamInput = createTextInput(`day${day}_imam`, `Nama Imam untuk Hari ke-${day}`, day);
+        const muadzinInput = createTextInput(`day${day}_muadzin`, `Nama Muadzin untuk Hari ke-${day}`, day);
+        const duaReaderInput = createTextInput(`day${day}_dua`, `Pembaca Du'a untuk Hari ke-${day}`, day);
+
+        container.appendChild(dayHeader);
+        container.appendChild(imamInput);
+        container.appendChild(muadzinInput);
+        container.appendChild(duaReaderInput);
       }
+    }
+
+    function createTextInput(name, placeholder, day) {
+      const label = document.createElement('label');
+      label.innerText = placeholder + ": ";
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = name;
+      input.placeholder = placeholder;
+      input.setAttribute("data-day", day);
+
+      const div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(input);
+
+      return div;
     }
   </script>
 </head>
 <body>
   <h1>Pengaturan Jadwal Petugas Sholat</h1>
-
-  <form id="schedule-form" onsubmit="event.preventDefault(); submitSchedule();">
+  <form onsubmit="submitSchedule(event)">
     <label for="month">Pilih Bulan: </label>
     <select id="month" name="month" onchange="generateInputs()">
       <option value="1">Januari</option>
@@ -85,7 +105,6 @@
     <input type="number" id="year" name="year" value="2024" onchange="generateInputs()"/>
 
     <div id="days-container"></div>
-
     <button type="submit">Submit</button>
   </form>
 </body>
