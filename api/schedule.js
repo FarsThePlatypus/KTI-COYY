@@ -21,13 +21,14 @@ app.post('/api/schedule', async (req, res) => {
 
   try {
     // Insert or update schedule for the given month and year
-    const query = `
-      INSERT INTO schedules (month, year, days)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (month, year)
-      DO UPDATE SET days = $3;
-    `;
-    await pool.query(query, [month, year, JSON.stringify(days)]);
+  const query = `
+  INSERT INTO schedules (month, year, days)
+  VALUES ($1, $2, $3)
+  ON CONFLICT (month, year)
+  DO UPDATE SET days = $3;
+  `;
+  await pool.query(query, [month, year, JSON.stringify(days)]);
+
     console.log(`Schedule for ${year}-${month} saved:`, days);
     res.send('Schedule submitted successfully!');
   } catch (err) {
