@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "vercel dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pg": "^8.x.x"
+  },
   "devDependencies": {
     "vercel": "^29.0.0"
   }
