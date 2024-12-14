@@ -29,7 +29,7 @@
           },
           body: JSON.stringify(data),
         });
-        
+
         if (response.ok) {
           alert('Schedule submitted successfully!');
         } else {
@@ -45,43 +45,23 @@
       const month = document.getElementById('month').value;
       const year = document.getElementById('year').value;
 
-      if (!month || !year) {
-        alert('Please select a valid month and year.');
-        return;
-      }
-
       try {
-        const url = `/api/view-schedule/specific?month=${month}&year=${year}`;
-        console.log('Fetching URL:', url);
-
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const data = await response.json();
-        console.log('Schedule data:', data);
-
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const container = document.getElementById('days-container');
-        container.innerHTML = '';
-
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dayHeader = document.createElement('h3');
-          dayHeader.innerText = `Hari ke-${day}:`;
-
-          const savedData = data[day] || {};
-
-          const imamInput = createTextInput(`imam`, `Nama Imam untuk Hari ke-${day}`, day, savedData.imam || '');
-          const muadzinInput = createTextInput(`muadzin`, `Nama Muadzin untuk Hari ke-${day}`, day, savedData.muadzin || '');
-          const duaReaderInput = createTextInput(`dua`, `Pembaca Du'a untuk Hari ke-${day}`, day, savedData.dua || '');
-
-          container.appendChild(dayHeader);
-          container.appendChild(imamInput);
-          container.appendChild(muadzinInput);
-          container.appendChild(duaReaderInput);
+        const response = await fetch(`/api/view-schedule/specific?month=${month}&year=${year}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            // No data found; generate blank input boxes
+            generateInputs();
+          } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return;
         }
+
+        const schedule = await response.json();
+        populateInputs(schedule);
       } catch (error) {
         console.error('Error loading schedule:', error);
-        alert('Failed to load schedule.');
+        alert('Error loading schedule.');
       }
     }
 
@@ -97,9 +77,32 @@
         const dayHeader = document.createElement('h3');
         dayHeader.innerText = `Hari ke-${day}:`;
 
-        const imamInput = createTextInput(`imam`, `Nama Imam untuk Hari ke-${day}`, day);
-        const muadzinInput = createTextInput(`muadzin`, `Nama Muadzin untuk Hari ke-${day}`, day);
-        const duaReaderInput = createTextInput(`dua`, `Pembaca Du'a untuk Hari ke-${day}`, day);
+        const imamInput = createTextInput(`imam`, `Nama Imam`, day);
+        const muadzinInput = createTextInput(`muadzin`, `Nama Muadzin`, day);
+        const duaReaderInput = createTextInput(`dua`, `Pembaca Du'a`, day);
+
+        container.appendChild(dayHeader);
+        container.appendChild(imamInput);
+        container.appendChild(muadzinInput);
+        container.appendChild(duaReaderInput);
+      }
+    }
+
+    function populateInputs(schedule) {
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      const daysInMonth = new Date(year, month, 0).getDate();
+
+      const container = document.getElementById('days-container');
+      container.innerHTML = '';
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayHeader = document.createElement('h3');
+        dayHeader.innerText = `Hari ke-${day}:`;
+
+        const imamInput = createTextInput(`imam`, `Nama Imam`, day, schedule[day]?.imam || '');
+        const muadzinInput = createTextInput(`muadzin`, `Nama Muadzin`, day, schedule[day]?.muadzin || '');
+        const duaReaderInput = createTextInput(`dua`, `Pembaca Du'a`, day, schedule[day]?.dua || '');
 
         container.appendChild(dayHeader);
         container.appendChild(imamInput);
@@ -110,7 +113,7 @@
 
     function createTextInput(name, placeholder, day, value = '') {
       const label = document.createElement('label');
-      label.innerText = placeholder + ": ";
+      label.innerText = `${placeholder}: `;
 
       const input = document.createElement('input');
       input.type = 'text';
@@ -125,13 +128,18 @@
 
       return div;
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('month').addEventListener('change', loadSchedule);
+      document.getElementById('year').addEventListener('change', loadSchedule);
+    });
   </script>
 </head>
 <body>
   <h1>Pengaturan Jadwal Petugas Sholat</h1>
   <form onsubmit="submitSchedule(event)">
     <label for="month">Pilih Bulan: </label>
-    <select id="month" name="month" onchange="loadSchedule()">
+    <select id="month" name="month">
       <option value="1">Januari</option>
       <option value="2">Februari</option>
       <option value="3">Maret</option>
@@ -147,7 +155,7 @@
     </select>
 
     <label for="year">Pilih Tahun: </label>
-    <input type="number" id="year" name="year" value="2024" onchange="loadSchedule()"/>
+    <input type="number" id="year" name="year" value="2024"/>
 
     <div id="days-container"></div>
     <button type="submit">Submit</button>
