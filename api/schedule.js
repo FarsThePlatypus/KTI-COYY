@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // PostgreSQL connection using Neon
 const pool = new Pool({
-  connectionString: 'postgresql://overlord_owner:WBHeV1YDvpn8@ep-rough-darkness-a1qiafxi.ap-southeast-1.aws.neon.tech/overlord?sslmode=require',
+  connectionString: 'postgresql://neondb_owner:o64zPMFCRtaN@ep-steep-cake-a1znrkld-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require',
   ssl: { rejectUnauthorized: false },
 });
 
