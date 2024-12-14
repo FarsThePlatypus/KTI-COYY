@@ -71,11 +71,3 @@ app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
 
-// SQL for creating the database table:
-// CREATE TABLE schedules (
-//   id SERIAL PRIMARY KEY,
-//   month INT NOT NULL,
-//   year INT NOT NULL,
-//   days JSONB NOT NULL,
-//   UNIQUE (month, year)
-// );
