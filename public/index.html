@@ -29,7 +29,7 @@
           },
           body: JSON.stringify(data),
         });
-
+        
         if (response.ok) {
           alert('Schedule submitted successfully!');
         } else {
@@ -45,9 +45,20 @@
       const month = document.getElementById('month').value;
       const year = document.getElementById('year').value;
 
+      if (!month || !year) {
+        alert('Please select a valid month and year.');
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/view-schedule/specific?month=${month}&year=${year}`);
+        const url = `/api/view-schedule/specific?month=${month}&year=${year}`;
+        console.log('Fetching URL:', url);
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
         const data = await response.json();
+        console.log('Schedule data:', data);
 
         const daysInMonth = new Date(year, month, 0).getDate();
         const container = document.getElementById('days-container');
@@ -70,7 +81,30 @@
         }
       } catch (error) {
         console.error('Error loading schedule:', error);
-        alert('Error loading schedule');
+        alert('Failed to load schedule.');
+      }
+    }
+
+    function generateInputs() {
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      const daysInMonth = new Date(year, month, 0).getDate();
+
+      const container = document.getElementById('days-container');
+      container.innerHTML = '';
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayHeader = document.createElement('h3');
+        dayHeader.innerText = `Hari ke-${day}:`;
+
+        const imamInput = createTextInput(`imam`, `Nama Imam untuk Hari ke-${day}`, day);
+        const muadzinInput = createTextInput(`muadzin`, `Nama Muadzin untuk Hari ke-${day}`, day);
+        const duaReaderInput = createTextInput(`dua`, `Pembaca Du'a untuk Hari ke-${day}`, day);
+
+        container.appendChild(dayHeader);
+        container.appendChild(imamInput);
+        container.appendChild(muadzinInput);
+        container.appendChild(duaReaderInput);
       }
     }
 
@@ -82,8 +116,8 @@
       input.type = 'text';
       input.name = name;
       input.placeholder = placeholder;
-      input.value = value;
       input.setAttribute("data-day", day);
+      input.value = value;
 
       const div = document.createElement('div');
       div.appendChild(label);
